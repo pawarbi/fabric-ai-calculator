@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unofficial Microsoft Fabric Copilot & AI Services Calculator</title>
+    <style>
+        :root {
+            --primary: #0078d4;
+            --secondary: #004578;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        
+        .calculator {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+        
+        h2 {
+            text-align: center;
+            color: var(--secondary);
+            font-size: 16px;
+            margin-bottom: 30px;
+            font-weight: normal;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--secondary);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        input[type="range"] {
+            flex-grow: 1;
+            height: 7px;
+            appearance: none;
+            background: #e0e0e0;
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        input[type="number"] {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .model-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .results {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .cost {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        button.tab {
+            background-color: #e0e0e0;
+            color: var(--dark);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            margin-right: 4px;
+        }
+        
+        button.tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        button.tab:hover:not(.active) {
+            background-color: #d0d0d0;
+        }
+        
+        .tooltip {
+            display: inline-block;
+            position: relative;
+            margin-left: 5px;
+            cursor: help;
+        }
+        
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background-color: #ddd;
+            color: #666;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .tooltip-text {
+            visibility: hidden;
+            width: 240px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -120px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            font-weight: normal;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .info-box {
+            background-color: #f0f8ff;
+            border-left: 4px solid var(--primary);
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .references {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        
+        .references h3 {
+            margin-bottom: 10px;
+        }
+        
+        .references ul {
+            padding-left: 20px;
+        }
+        
+        .references li {
+            margin-bottom: 8px;
+        }
+        
+        .references a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .references a:hover {
+            text-decoration: underline;
+        }
+        
+        .author {
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .disclaimer {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Unofficial Microsoft Fabric Copilot & AI Services Calculator</h1>
+    <div class="author">Created by Sandeep Pawar + Claude 3.7</div>
+    
+    <div class="info-box">
+        <p>This calculator helps estimate consumption of Fabric Capacity Units (CU) and associated costs for AI workloads in Microsoft Fabric.</p>
+    </div>
+    
+    <div class="disclaimer">
+        <p><strong>Important:</strong> These calculations provide estimates only and may not reflect exact costs. Always refer to the official Microsoft documentation for accurate and up-to-date pricing information.</p>
+    </div>
+    
+    <div class="calculator">
+        <div class="tab-buttons">
+            <button class="tab" onclick="switchTab('copilotTab')">Copilot</button>
+            <button class="tab" onclick="switchTab('dataAgentTab')">Data Agent</button>
+            <button class="tab" onclick="switchTab('aiFunctionsTab')">AI Functions</button>
+            <button class="tab" onclick="switchTab('openaiTab')">OpenAI Models</button>
+        </div>
+        
+        <div class="input-group">
+            <label>Capacity Type</label>
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="reserved" name="capacityType" value="reserved" checked onchange="updateAllCosts()">
+                    <label for="reserved">Reserved Instance ($0.1075/hour)</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="payg" name="capacityType" value="payg" onchange="updateAllCosts()">
+                    <label for="payg">PAYG ($0.18/hour)</label>
+                </div>
+            </div>
+            <p><strong>Region:</strong> US Central</p>
+        </div>
+        
+        <div id="copilotTab" class="tab-content">
+            <div class="input-group">
+                <label for="copilotInputTokens">
+                    Input Tokens
+                    <span class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Tokens sent to the model (prompt). For every 750 words, approximately 1,000 tokens are generated.</span>
+                    </span>
+                </label>
+                <div class="slider-container">
+                    <input type="range" id="copilotInputTokensSlider" min="0" max="100000" value="1000" step="100" oninput="updateCopilotInputTokens(this.value)">
+                    <input type="number" id="copilotInputTokens" value="1000" min="0" max="100000" oninput="updateCopilotInputTokensSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="copilotOutputTokens">
+                    Output Tokens
+                    <span class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Tokens generated by the model (response). For every 750 words, approximately 1,000 tokens are generated.</span>
+                    </span>
+                </label>
+                <div class="slider-container">
+                    <input type="range" id="copilotOutputTokensSlider" min="0" max="100000" value="500" step="100" oninput="updateCopilotOutputTokens(this.value)">
+                    <input type="number" id="copilotOutputTokens" value="500" min="0" max="100000" oninput="updateCopilotOutputTokensSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="results">
+                <h3>Capacity Units (CU) Consumed</h3>
+                <div id="copilotConsumptionBreakdown"></div>
+                <h3>Estimated Cost</h3>
+                <div class="cost" id="copilotTotalCost">$0.00</div>
+            </div>
+        </div>
+        
+        <div id="dataAgentTab" class="tab-content">
+            <div class="input-group">
+                <label for="dataAgentInputTokens">
+                    Input Tokens
+                    <span class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Tokens sent to the model (prompt). For every 750 words, approximately 1,000 tokens are generated.</span>
+                    </span>
+                </label>
+                <div class="slider-container">
+                    <input type="range" id="dataAgentInputTokensSlider" min="0" max="100000" value="1000" step="100" oninput="updateDataAgentInputTokens(this.value)">
+                    <input type="number" id="dataAgentInputTokens" value="1000" min="0" max="100000" oninput="updateDataAgentInputTokensSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="dataAgentOutputTokens">
+                    Output Tokens
+                    <span class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Tokens generated by the model (response). For every 750 words, approximately 1,000 tokens are generated.</ما>
+                    </span>
+                </label>
+                <div class="slider-container">
+                    <input type="range" id="dataAgentOutputTokensSlider" min="0" max="100000" value="500" step="100" oninput="updateDataAgentOutputTokens(this.value)">
+                    <input type="number" id="dataAgentOutputTokens" value="500" min="0" max="100000" oninput="updateDataAgentOutputTokensSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="results">
+                <h3>Capacity Units (CU) Consumed</h3>
+                <div id="dataAgentConsumptionBreakdown"></div>
+                <h3>Estimated Cost</h3>
+                <div class="cost" id="dataAgentTotalCost">$0.00</div>
+            </div>
+        </div>
+        
+        <div id="aiFunctionsTab" class="tab-content">
+            <div class="info-box">
+                <p><strong>Note:</strong> AI Functions use the GPT-3.5-Turbo model by default.</p>
+            </div>
+            
+            <div class="input-group">
+                <label for="aiFunctionsInputTokens">
+                    Input Tokens
+                    <span class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Tokens sent to the model (prompt). For every 750 words, approximately 1,000 tokens are generated.</span>
+                    </span>
+                </label>
+                <div class="slider-container">
+                    <input type="range" id="aiFunctionsInputTokensSlider" min="0" max="100000" value="46000" step="100" oninput="updateAIFunctionsInputTokens(this.value)">
+                    <input type="number" id="aiFunctionsInputTokens" value="46000" min="0" max="100000" oninput="updateAIFunctionsInputTokensSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="aiFunctionsOutputTokens">
+                    Output Tokens
+                    <span class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Tokens generated by the model (response). For every 750 words, approximately 1,000 tokens are generated.</span>
+                    </span>
+                </label>
+                <div class="slider-container">
+                    <input type="range" id="aiFunctionsOutputTokensSlider" min="0" max="100000" value="12000" step="100" oninput="updateAIFunctionsOutputTokens(this.value)">
+                    <input type="number" id="aiFunctionsOutputTokens" value="12000" min="0" max="100000" oninput="updateAIFunctionsOutputTokensSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="results">
+                <h3>Capacity Units (CU) Consumed</h3>
+                <div id="aiFunctionsConsumptionBreakdown"></div>
+                <h3>Estimated Cost</h3>
+                <div class="cost" id="aiFunctionsTotalCost">$0.00</div>
+            </div>
+        </div>
+        
+        <div id="openaiTab" class="tab-content">
+            <div class="input-group">
+                <label for="openaiModel">Select Model</label>
+                <select id="openaiModel" class="model-select" onchange="calculateOpenAICost()">
+                    <option value="gpt-4-global">GPT-4o-2024-08-06 Global (128K context)</option>
+                    <option value="gpt-4">GPT-4 (32K context)</option>
+                    <option value="gpt-35-turbo">GPT-3.5-Turbo (16K context)</option>
+                    <option value="text-embedding">text-embedding-ada-002</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="openaiInputTokens">
+                    Input Tokens
+                    <span class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Tokens sent to the model (prompt). For every 750 words, approximately 1,000 tokens are generated.</span>
+                    </span>
+                </label>
+                <div class="slider-container">
+                    <input type="range" id="openaiInputTokensSlider" min="0" max="100000" value="1000" step="100" oninput="updateOpenAIInputTokens(this.value)">
+                    <input type="number" id="openaiInputTokens" value="1000" min="0" max="100000" oninput="updateOpenAIInputTokensSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="input-group" id="openaiOutputContainer">
+                <label for="openaiOutputTokens">
+                    Output Tokens
+                    <span class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Tokens generated by the model (response). For every 750 words, approximately 1,000 tokens are generated.</span>
+                    </span>
+                </label>
+                <div class="slider-container">
+                    <input type="range" id="openaiOutputTokensSlider" min="0" max="100000" value="500" step="100" oninput="updateOpenAIOutputTokens(this.value)">
+                    <input type="number" id="openaiOutputTokens" value="500" min="0" max="100000" oninput="updateOpenAIOutputTokensSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="results">
+                <h3>Capacity Units (CU) Consumed</h3>
+                <div id="openaiConsumptionBreakdown"></div>
+                <h3>Estimated Cost</h3>
+                <div class="cost" id="openaiTotalCost">$0.00</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="references">
+        <h3>References</h3>
+        <p>If you are unsure of the number of tokens, you can use the <a href="https://platform.openai.com/tokenizer" target="_blank">OpenAI Tokenizer</a> for estimation.</p>
+        <ul>
+            <li><a href="https://learn.microsoft.com/en-us/fabric/fundamentals/copilot-fabric-consumption" target="_blank">Microsoft Fabric Copilot Consumption</a></li>
+            <li><a href="https://learn.microsoft.com/en-us/fabric/fundamentals/data-agent-consumption" target="_blank">Microsoft Fabric Data Agent Consumption</a></li>
+            <li><a href="https://learn.microsoft.com/en-us/fabric/data-science/ai-services/ai-services-overview" target="_blank">AI Services and AI Functions</a></li>
+            <li><a href="https://azure.microsoft.com/en-us/pricing/details/microsoft-fabric/" target="_blank">Fabric Capacity Pricing</a></li>
+            <li><a href="https://fabric.guru/unstructured-to-structured-using-fabric-ai-functions-to-extract-invoice-data-from-pdfs" target="_blank">Unstructured to Structured: Using Fabric AI Functions to Extract Invoice Data from PDFs</a> (My blog)</li>
+        </ul>
+    </div>
+    
+    <div class="disclaimer">
+        <p><strong>Disclaimer:</strong> These calculations provide estimates only and may not reflect exact costs. Always refer to the official Microsoft documentation for accurate pricing information.</p>
+    </div>
+    
+    <div class="footer">
+        <p>www.fabric.guru</p>
+    </div>
+    
+    <script>
+        // Consumption rates (CU seconds per 1000 tokens)
+        const rates = {
+            copilot: { input: 100, output: 400 },
+            dataAgent: { input: 100, output: 400 },
+            aiFunctions: { input: 16.81, output: 50.42 }, // GPT-3.5-Turbo rates for AI Functions
+            openai: {
+                'gpt-4-global': { input: 84.03, output: 336.13 },
+                'gpt-4': { input: 2016.81, output: 4033.61 },
+                'gpt-35-turbo': { input: 16.81, output: 50.42 },
+                'text-embedding': { input: 3.36, output: 0 }
+            }
+        };
+        
+        // Capacity costs per hour
+        const capacityCosts = {
+            reserved: 0.1075,
+            payg: 0.18
+        };
+        
+        // Initialize UI
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default values
+            document.getElementById('copilotInputTokens').value = 1000;
+            document.getElementById('copilotInputTokensSlider').value = 1000;
+            document.getElementById('copilotOutputTokens').value = 500;
+            document.getElementById('copilotOutputTokensSlider').value = 500;
+            
+            document.getElementById('dataAgentInputTokens').value = 1000;
+            document.getElementById('dataAgentInputTokensSlider').value = 1000;
+            document.getElementById('dataAgentOutputTokens').value = 500;
+            document.getElementById('dataAgentOutputTokensSlider').value = 500;
+            
+            document.getElementById('aiFunctionsInputTokens').value = 46000;
+            document.getElementById('aiFunctionsInputTokensSlider').value = 46000;
+            document.getElementById('aiFunctionsOutputTokens').value = 12000;
+            document.getElementById('aiFunctionsOutputTokensSlider').value = 12000;
+            
+            document.getElementById('openaiInputTokens').value = 1000;
+            document.getElementById('openaiInputTokensSlider').value = 1000;
+            document.getElementById('openaiOutputTokens').value = 500;
+            document.getElementById('openaiOutputTokensSlider').value = 500;
+            
+            // Set first tab as active
+            document.querySelector('.tab').classList.add('active');
+            document.getElementById('copilotTab').classList.add('active');
+            
+            // Calculate initial values
+            calculateCopilotCost();
+            calculateDataAgentCost();
+            calculateAIFunctionsCost();
+            calculateOpenAICost();
+        });
+        
+        // Tab switching function
+        function switchTab(tabId) {
+            // Hide all tabs
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            // Remove active class from all tab buttons
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // Find the button that opened the tab and add active class
+            const buttons = document.getElementsByClassName('tab');
+            for (let i = 0; i < buttons.length; i++) {
+                if (buttons[i].getAttribute('onclick').includes(tabId)) {
+                    buttons[i].classList.add('active');
+                }
+            }
+        }
+        
+        // Get capacity cost per hour based on selected radio button
+        function getCapacityCostPerHour() {
+            return document.getElementById('reserved').checked ? 
+                capacityCosts.reserved : capacityCosts.payg;
+        }
+        
+        // Update all costs when capacity type changes
+        function updateAllCosts() {
+            calculateCopilotCost();
+            calculateDataAgentCost();
+            calculateAIFunctionsCost();
+            calculateOpenAICost();
+        }
+        
+        // Copilot tab functions
+        function updateCopilotInputTokens(value) {
+            document.getElementById('copilotInputTokens').value = value;
+            calculateCopilotCost();
+        }
+        
+        function updateCopilotInputTokensSlider(value) {
+            document.getElementById('copilotInputTokensSlider').value = value;
+            calculateCopilotCost();
+        }
+        
+        function updateCopilotOutputTokens(value) {
+            document.getElementById('copilotOutputTokens').value = value;
+            calculateCopilotCost();
+        }
+        
+        function updateCopilotOutputTokensSlider(value) {
+            document.getElementById('copilotOutputTokensSlider').value = value;
+            calculateCopilotCost();
+        }
+        
+        function calculateCopilotCost() {
+            const inputTokens = parseInt(document.getElementById('copilotInputTokens').value);
+            const outputTokens = parseInt(document.getElementById('copilotOutputTokens').value);
+            const cuCostPerHour = getCapacityCostPerHour();
+            
+            // Calculate CU seconds
+            const inputCUSeconds = (inputTokens / 1000) * rates.copilot.input;
+            const outputCUSeconds = (outputTokens / 1000) * rates.copilot.output;
+            const totalCUSeconds = inputCUSeconds + outputCUSeconds;
+            
+            // Calculate cost from CU seconds
+            const totalCUHours = totalCUSeconds / 3600;
+            const totalCost = totalCUHours * cuCostPerHour;
+            
+            // Update display
+            const consumptionBreakdown = document.getElementById('copilotConsumptionBreakdown');
+            consumptionBreakdown.innerHTML = `
+                <p>Input (${inputTokens.toLocaleString()} tokens): ${inputCUSeconds.toFixed(2)} CU seconds (${(inputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                <p>Output (${outputTokens.toLocaleString()} tokens): ${outputCUSeconds.toFixed(2)} CU seconds (${(outputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                <p>Total: ${totalCUSeconds.toFixed(2)} CU seconds (${totalCUHours.toFixed(6)} CU hours)</p>
+            `;
+            
+            document.getElementById('copilotTotalCost').textContent = `$${totalCost.toFixed(2)}`;
+        }
+        
+        // Data Agent tab functions
+        function updateDataAgentInputTokens(value) {
+            document.getElementById('dataAgentInputTokens').value = value;
+            calculateDataAgentCost();
+        }
+        
+        function updateDataAgentInputTokensSlider(value) {
+            document.getElementById('dataAgentInputTokensSlider').value = value;
+            calculateDataAgentCost();
+        }
+        
+        function updateDataAgentOutputTokens(value) {
+            document.getElementById('dataAgentOutputTokens').value = value;
+            calculateDataAgentCost();
+        }
+        
+        function updateDataAgentOutputTokensSlider(value) {
+            document.getElementById('dataAgentOutputTokensSlider').value = value;
+            calculateDataAgentCost();
+        }
+        
+        function calculateDataAgentCost() {
+            const inputTokens = parseInt(document.getElementById('dataAgentInputTokens').value);
+            const outputTokens = parseInt(document.getElementById('dataAgentOutputTokens').value);
+            const cuCostPerHour = getCapacityCostPerHour();
+            
+            // Calculate CU seconds
+            const inputCUSeconds = (inputTokens / 1000) * rates.dataAgent.input;
+            const outputCUSeconds = (outputTokens / 1000) * rates.dataAgent.output;
+            const totalCUSeconds = inputCUSeconds + outputCUSeconds;
+            
+            // Calculate cost from CU seconds
+            const totalCUHours = totalCUSeconds / 3600;
+            const totalCost = totalCUHours * cuCostPerHour;
+            
+            // Update display
+            const consumptionBreakdown = document.getElementById('dataAgentConsumptionBreakdown');
+            consumptionBreakdown.innerHTML = `
+                <p>Input (${inputTokens.toLocaleString()} tokens): ${inputCUSeconds.toFixed(2)} CU seconds (${(inputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                <p>Output (${outputTokens.toLocaleString()} tokens): ${outputCUSeconds.toFixed(2)} CU seconds (${(outputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                <p>Total: ${totalCUSeconds.toFixed(2)} CU seconds (${totalCUHours.toFixed(6)} CU hours)</p>
+            `;
+            
+            document.getElementById('dataAgentTotalCost').textContent = `$${totalCost.toFixed(2)}`;
+        }
+        
+        // AI Functions tab functions
+        function updateAIFunctionsInputTokens(value) {
+            document.getElementById('aiFunctionsInputTokens').value = value;
+            calculateAIFunctionsCost();
+        }
+        
+        function updateAIFunctionsInputTokensSlider(value) {
+            document.getElementById('aiFunctionsInputTokensSlider').value = value;
+            calculateAIFunctionsCost();
+        }
+        
+        function updateAIFunctionsOutputTokens(value) {
+            document.getElementById('aiFunctionsOutputTokens').value = value;
+            calculateAIFunctionsCost();
+        }
+        
+        function updateAIFunctionsOutputTokensSlider(value) {
+            document.getElementById('aiFunctionsOutputTokensSlider').value = value;
+            calculateAIFunctionsCost();
+        }
+        
+        function calculateAIFunctionsCost() {
+            const inputTokens = parseInt(document.getElementById('aiFunctionsInputTokens').value);
+            const outputTokens = parseInt(document.getElementById('aiFunctionsOutputTokens').value);
+            const cuCostPerHour = getCapacityCostPerHour();
+            
+            // Calculate CU seconds
+            const inputCUSeconds = (inputTokens / 1000) * rates.aiFunctions.input;
+            const outputCUSeconds = (outputTokens / 1000) * rates.aiFunctions.output;
+            const totalCUSeconds = inputCUSeconds + outputCUSeconds;
+            
+            // Calculate cost from CU seconds
+            const totalCUHours = totalCUSeconds / 3600;
+            const totalCost = totalCUHours * cuCostPerHour;
+            
+            // Update display
+            const consumptionBreakdown = document.getElementById('aiFunctionsConsumptionBreakdown');
+            consumptionBreakdown.innerHTML = `
+                <p>Input (${inputTokens.toLocaleString()} tokens): ${inputCUSeconds.toFixed(2)} CU seconds (${(inputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                <p>Output (${outputTokens.toLocaleString()} tokens): ${outputCUSeconds.toFixed(2)} CU seconds (${(outputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                <p>Total: ${totalCUSeconds.toFixed(2)} CU seconds (${totalCUHours.toFixed(6)} CU hours)</p>
+            `;
+            
+            document.getElementById('aiFunctionsTotalCost').textContent = `$${totalCost.toFixed(2)}`;
+        }
+        
+        // OpenAI tab functions
+        function updateOpenAIInputTokens(value) {
+            document.getElementById('openaiInputTokens').value = value;
+            calculateOpenAICost();
+        }
+        
+        function updateOpenAIInputTokensSlider(value) {
+            document.getElementById('openaiInputTokensSlider').value = value;
+            calculateOpenAICost();
+        }
+        
+        function updateOpenAIOutputTokens(value) {
+            document.getElementById('openaiOutputTokens').value = value;
+            calculateOpenAICost();
+        }
+        
+        function updateOpenAIOutputTokensSlider(value) {
+            document.getElementById('openaiOutputTokensSlider').value = value;
+            calculateOpenAICost();
+        }
+        
+        function calculateOpenAICost() {
+            const modelSelect = document.getElementById('openaiModel');
+            const inputTokens = parseInt(document.getElementById('openaiInputTokens').value);
+            const outputTokensElement = document.getElementById('openaiOutputTokens');
+            const outputTokens = modelSelect.value === 'text-embedding' ? 0 : parseInt(outputTokensElement.value);
+            const cuCostPerHour = getCapacityCostPerHour();
+            
+            // Hide or show output tokens based on model type
+            const outputContainer = document.getElementById('openaiOutputContainer');
+            outputContainer.style.display = modelSelect.value === 'text-embedding' ? 'none' : 'block';
+            
+            // Get consumption rates for selected model
+            const modelRates = rates.openai[modelSelect.value];
+            
+            // Calculate CU seconds
+            const inputCUSeconds = (inputTokens / 1000) * modelRates.input;
+            const outputCUSeconds = (outputTokens / 1000) * modelRates.output;
+            const totalCUSeconds = inputCUSeconds + outputCUSeconds;
+            
+            // Calculate cost from CU seconds
+            const totalCUHours = totalCUSeconds / 3600;
+            const totalCost = totalCUHours * cuCostPerHour;
+            
+            // Update display
+            const consumptionBreakdown = document.getElementById('openaiConsumptionBreakdown');
+            
+            if (modelSelect.value === 'text-embedding') {
+                consumptionBreakdown.innerHTML = `
+                    <p>Input (${inputTokens.toLocaleString()} tokens): ${inputCUSeconds.toFixed(2)} CU seconds (${(inputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                    <p>Total: ${totalCUSeconds.toFixed(2)} CU seconds (${totalCUHours.toFixed(6)} CU hours)</p>
+                `;
+            } else {
+                consumptionBreakdown.innerHTML = `
+                    <p>Input (${inputTokens.toLocaleString()} tokens): ${inputCUSeconds.toFixed(2)} CU seconds (${(inputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                    <p>Output (${outputTokens.toLocaleString()} tokens): ${outputCUSeconds.toFixed(2)} CU seconds (${(outputCUSeconds/3600).toFixed(6)} CU hours)</p>
+                    <p>Total: ${totalCUSeconds.toFixed(2)} CU seconds (${totalCUHours.toFixed(6)} CU hours)</p>
+                `;
+            }
+            
+            document.getElementById('openaiTotalCost').textContent = `$${totalCost.toFixed(2)}`;
+        }
+        
+        // Initialize to first tab
+        window.onload = function() {
+            document.querySelector('.tab').click();
+        };
+    </script>
+</body>
+</html>
