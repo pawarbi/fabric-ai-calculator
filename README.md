@@ -1,5 +1,5 @@
 # fabric-ai-calculator
-Estimating Fabric Copilot and AI Cost. Made by Sandeep Pawar. www.fabric.guru
+Estimating Microsoft Fabric Copilot and AI costs. Made by Sandeep Pawar. www.fabric.guru
 
 These are only estimates, always refer to the official Microsoft documentation.
 Feel free tp create a PR if you would like to contribute. 
