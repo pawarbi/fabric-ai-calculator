@@ -17,6 +17,7 @@ Below pricing is used. Pricing as of 04/11/2025
 | GPT-4 (32K context) | 2016.81 | 4033.61 |
 | GPT-3.5-Turbo (16K context) | 16.81 | 50.42 |
 | text-embedding-ada-002 | 3.36 | 0 |
+Copilot requests are classified as background jobs and spread over 24 hours. AI Functions and Open AI models can be background or interactive depending on how the notebook is run.
 
 ## References:
 - https://learn.microsoft.com/en-us/fabric/data-science/ai-services/ai-services-overview
