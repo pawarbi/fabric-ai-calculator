@@ -3,7 +3,7 @@ Estimating Fabric Copilot and AI Cost
 
 https://pawarbi.github.io/fabric-ai-calculator/
 
-Below pricing is used.
+Below pricing is used. Pricing as of 04/11/2025
 
 | Experience | CU(s)/1000 tokens Input | CU(s)/1000 tokens Output |
 |------------|--------------------------|--------------------------|
